@@ -1,0 +1,15 @@
+{
+  "name": "microservices-project",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "concurrently \"npm start --prefix services/auth-service\" \"npm start --prefix services/user-service\" \"npm start --prefix services/order-service\" \"npm start --prefix services/product-service\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^9.2.0"
+  }
+}

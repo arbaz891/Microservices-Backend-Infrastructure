@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  auth-service:
+    build: ./services/auth-service
+    ports:
+      - "3001:3001"
+
+  user-service:
+    build: ./services/user-service
+    ports:
+      - "3002:3002"
+
+  order-service:
+    build: ./services/order-service
+    ports:
+      - "3003:3003"
+
+  product-service:
+    build: ./services/product-service
+    ports:
+      - "3004:3004"
+
