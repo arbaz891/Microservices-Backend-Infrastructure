@@ -5,21 +5,45 @@ services:
     build: ./services/auth-service
     ports:
       - "3001:3001"
+    environment:
+      DATABASE_URL: postgres://myuser:mypassword@postgres:5432/auth_db
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
 
   user-service:
     build: ./services/user-service
     ports:
       - "3002:3002"
+    environment:
+      DATABASE_URL: postgres://myuser:mypassword@postgres:5432/user_db
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
 
   order-service:
     build: ./services/order-service
     ports:
       - "3003:3003"
+    environment:
+      DATABASE_URL: postgres://myuser:mypassword@postgres:5432/order_db
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
 
   product-service:
     build: ./services/product-service
     ports:
       - "3004:3004"
+    environment:
+      DATABASE_URL: postgres://myuser:mypassword@postgres:5432/product_db
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
 
   gateway:
     image: nginx:latest
@@ -33,4 +57,26 @@ services:
       - user-service
       - order-service
       - product-service
+
+  postgres:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: auth_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  redis:
+    image: redis:latest
+    restart: always
+    ports:
+      - "6379:6379"
+
+volumes:
+  pgdata:
 
