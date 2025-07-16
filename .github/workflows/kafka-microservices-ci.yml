@@ -1,4 +1,5 @@
-name: Full CI/CD for Kafka Microservices
+
+name: Full CI/CD automation for Kafka Microservices
 
 on:
   push:
