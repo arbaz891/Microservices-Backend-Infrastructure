@@ -1,12 +1,11 @@
-
-name: Full CI/CD automation for Kafka Microservices
+name: Full CI/CD for Kafka Microservices
 
 on:
   push:
     branches: [main]
 
 jobs:
-  test-and-build:
+  test-build-push:
     runs-on: ubuntu-latest
 
     steps:
@@ -17,23 +16,16 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: 🔐 Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-      - name: 🔐 Login to Docker Hub
         run: |
           echo "${{ secrets.DOCKER_PASSWORD }}" | \
             docker login --username "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-
-
-      # Start all services via docker-compose for testing
       - name: 🧪 Build & Start All Services (for test)
         run: docker compose up -d --build
 
       - name: ⏳ Wait for services to be ready
         run: sleep 30
 
-      # Run tests inside each service
       - name: ✅ Run tests in auth-service
         run: docker compose exec -T auth-service npm test || true
 
@@ -46,36 +38,34 @@ jobs:
       - name: ✅ Run tests in product-service
         run: docker compose exec -T product-service npm test || true
 
-      - name: 🧹 Stop Docker Compose
+      - name: 🧹 Shutdown Docker Compose
         run: docker compose down
 
-      # Push all service images to Docker Hub
-
-      - name: 🚀 Build & Push auth-service
+      - name: 🚀 Build & Push auth-service image
         uses: docker/build-push-action@v5
         with:
           context: ./services/auth-service
           push: true
-          tags: yourdockerhubuser/microservices:auth-service-latest
+          tags: arbaz892/microservices:auth-service-latest
 
-      - name: 🚀 Build & Push user-service
+      - name: 🚀 Build & Push user-service image
         uses: docker/build-push-action@v5
         with:
           context: ./services/user-service
           push: true
-          tags: yourdockerhubuser/microservices:user-service-latest
+          tags: arbaz892/microservices:user-service-latest
 
-      - name: 🚀 Build & Push order-service
+      - name: 🚀 Build & Push order-service image
         uses: docker/build-push-action@v5
         with:
           context: ./services/order-service
           push: true
-          tags: yourdockerhubuser/microservices:order-service-latest
+          tags: arbaz892/microservices:order-service-latest
 
-      - name: 🚀 Build & Push product-service
+      - name: 🚀 Build & Push product-service image
         uses: docker/build-push-action@v5
         with:
           context: ./services/product-service
           push: true
-          tags: yourdockerhubuser/microservices:product-service-latest
+          tags: arbaz892/microservices:product-service-latest
 
