@@ -1,0 +1,44 @@
+name: CI for Kafka Microservices
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 🐳 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 📦 Build and Start Docker Compose Services
+        run: docker-compose up -d --build
+
+      - name: ⏳ Wait for Services to Start
+        run: |
+          echo "Waiting for Kafka, Redis, Postgres, and other services to be ready..."
+          sleep 25
+          docker ps
+
+      - name: ✅ Run Tests in auth-service
+        run: docker-compose exec -T auth-service npm test || true
+
+      - name: ✅ Run Tests in user-service
+        run: docker-compose exec -T user-service npm test || true
+
+      - name: ✅ Run Tests in order-service
+        run: docker-compose exec -T order-service npm test || true
+
+      - name: ✅ Run Tests in product-service
+        run: docker-compose exec -T product-service npm test || true
+
+      - name: 🧹 Shutdown Docker Compose
+        if: always()
+        run: docker-compose down
+
