@@ -1,13 +1,11 @@
-name: CI for Kafka Microservices
+name: Full CI/CD for Kafka Microservices
 
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
 
 jobs:
-  test:
+  test-and-build:
     runs-on: ubuntu-latest
 
     steps:
@@ -17,28 +15,62 @@ jobs:
       - name: 🐳 Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: 📦 Build and Start Docker Compose Services
+      - name: 🔐 Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # Start all services via docker-compose for testing
+      - name: 🧪 Build & Start All Services (for test)
         run: docker compose up -d --build
 
-      - name: ⏳ Wait for Services to Start
-        run: |
-          echo "Waiting for Kafka, Redis, Postgres, and other services to be ready..."
-          sleep 25
-          docker ps
+      - name: ⏳ Wait for services to be ready
+        run: sleep 30
 
-      - name: ✅ Run Tests in auth-service
+      # Run tests inside each service
+      - name: ✅ Run tests in auth-service
         run: docker compose exec -T auth-service npm test || true
 
-      - name: ✅ Run Tests in user-service
+      - name: ✅ Run tests in user-service
         run: docker compose exec -T user-service npm test || true
 
-      - name: ✅ Run Tests in order-service
+      - name: ✅ Run tests in order-service
         run: docker compose exec -T order-service npm test || true
 
-      - name: ✅ Run Tests in product-service
+      - name: ✅ Run tests in product-service
         run: docker compose exec -T product-service npm test || true
 
-      - name: 🧹 Shutdown Docker Compose
-        if: always()
+      - name: 🧹 Stop Docker Compose
         run: docker compose down
+
+      # Push all service images to Docker Hub
+
+      - name: 🚀 Build & Push auth-service
+        uses: docker/build-push-action@v5
+        with:
+          context: ./services/auth-service
+          push: true
+          tags: yourdockerhubuser/microservices:auth-service-latest
+
+      - name: 🚀 Build & Push user-service
+        uses: docker/build-push-action@v5
+        with:
+          context: ./services/user-service
+          push: true
+          tags: yourdockerhubuser/microservices:user-service-latest
+
+      - name: 🚀 Build & Push order-service
+        uses: docker/build-push-action@v5
+        with:
+          context: ./services/order-service
+          push: true
+          tags: yourdockerhubuser/microservices:order-service-latest
+
+      - name: 🚀 Build & Push product-service
+        uses: docker/build-push-action@v5
+        with:
+          context: ./services/product-service
+          push: true
+          tags: yourdockerhubuser/microservices:product-service-latest
 
