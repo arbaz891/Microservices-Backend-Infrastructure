@@ -1,6 +1,6 @@
  Microservices Backend Infrastructure
 
-A production-ready microservices backend system using Docker, NGINX API Gateway, PostgreSQL, Redis, Kafka, and GitHub Actions CI/CD.
+A production-ready microservices backend system using Docker, NGINX API Gateway, PostgreSQL, Redis, Kafka, and GitHub Actions CI/CD. using monitring grafana and prometheus.
 
 ## 🔧 Services
 
