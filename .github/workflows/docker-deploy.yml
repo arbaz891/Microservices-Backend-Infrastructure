@@ -1,0 +1,40 @@
+name: Build and Push Docker Images
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PAT }}" | docker login --username "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Build and Push auth-service
+        run: |
+          docker build -t arbaz892/microservice-project:auth-service ./services/auth-service
+          docker push arbaz892/microservice-project:auth-service
+
+      - name: Build and Push user-service
+        run: |
+          docker build -t arbaz892/microservice-project:user-service ./services/user-service
+          docker push arbaz892/microservice-project:user-service
+
+      - name: Build and Push order-service
+        run: |
+          docker build -t arbaz892/microservice-project:order-service ./services/order-service
+          docker push arbaz892/microservice-project:order-service
+
+      - name: Build and Push product-service
+        run: |
+          docker build -t arbaz892/microservice-project:product-service ./services/product-service
+          docker push arbaz892/microservice-project:product-service
