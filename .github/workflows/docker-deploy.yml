@@ -16,8 +16,17 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Check Docker Secrets
+        run: |
+          if [ -z "${{ secrets.DOCKER_PAT }}" ]; then
+            echo "❌ ERROR: DOCKER_PAT is empty!"
+            exit 1
+          else
+            echo "✅ DOCKER_PAT is set"
+          fi
+
       - name: Log in to Docker Hub
-        run: echo "${{ secrets.DOCKER_PAT }}" | docker login --username "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+        run: echo "${{ secrets.DOCKER_PAT }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
       - name: Build and Push auth-service
         run: |
@@ -38,3 +47,4 @@ jobs:
         run: |
           docker build -t arbaz892/microservice-project:product-service ./services/product-service
           docker push arbaz892/microservice-project:product-service
+
