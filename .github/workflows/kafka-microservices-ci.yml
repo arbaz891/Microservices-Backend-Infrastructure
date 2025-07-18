@@ -1,4 +1,4 @@
-name: Full CI/CD  Kafka Microservices
+name: Full CI/CD Kafka Microservices
 
 on:
   push:
@@ -9,60 +9,61 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📥 Checkout Code
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: 🐳 Set up Docker Buildx
+      - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: 🔐 Login to Docker Hub
-        run: |
-          echo "${{ secrets.DOCKER_PASSWORD }}" | \
-            docker login --username "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: 🧪 Build & Start All Services (for test)
+      - name: Build & Start All Services (for test)
         run: docker compose up -d --build
 
-      - name: ⏳ Wait for services to be ready
+      - name: Wait for services to be ready
         run: sleep 30
 
-      - name: ✅ Run tests in auth-service
+      - name: Run tests in auth-service
         run: docker compose exec -T auth-service npm test || true
 
-      - name: ✅ Run tests in user-service
+      - name: Run tests in user-service
         run: docker compose exec -T user-service npm test || true
 
-      - name: ✅ Run tests in order-service
+      - name: Run tests in order-service
         run: docker compose exec -T order-service npm test || true
 
-      - name: ✅ Run tests in product-service
+      - name: Run tests in product-service
         run: docker compose exec -T product-service npm test || true
 
-      - name: 🧹 Shutdown Docker Compose
+      - name: Shutdown Docker Compose
         run: docker compose down
 
-      - name: 🚀 Build & Push auth-service image
+      - name: Build & Push auth-service image
         uses: docker/build-push-action@v5
         with:
           context: ./services/auth-service
           push: true
           tags: arbaz892/microservices:auth-service-latest
 
-      - name: 🚀 Build & Push user-service image
+      - name: Build & Push user-service image
         uses: docker/build-push-action@v5
         with:
           context: ./services/user-service
           push: true
           tags: arbaz892/microservices:user-service-latest
 
-      - name: 🚀 Build & Push order-service image
+      - name: Build & Push order-service image
         uses: docker/build-push-action@v5
         with:
           context: ./services/order-service
           push: true
           tags: arbaz892/microservices:order-service-latest
 
-      - name: 🚀 Build & Push product-service image
+      - name: Build & Push product-service image
         uses: docker/build-push-action@v5
         with:
           context: ./services/product-service
